@@ -25,7 +25,7 @@ variable "project" {
   type        = string
 }
 
-variable "user_defined_string" {
+variable "userDefinedString" {
   description = "(Required) User defined portion value for the name of the VM."
   type        = string
 }

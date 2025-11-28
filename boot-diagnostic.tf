@@ -3,7 +3,7 @@ module "boot_diagnostic_storage" {
   source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git?ref=v1.0.3"
   count  = try(var.vmss.boot_diagnostic.use_managed_storage_account, true) ? 0 : (try(var.vmss.boot_diagnostic, false) ? (try(var.vmss.boot_diagnostic.storage_account_resource_id, "") == "" ? 1 : 0) : 0)
 
-  userDefinedString    = "${var.user_defined_string}-logs"
+  userDefinedString    = "${var.userDefinedString}-logs"
   location             = var.location
   env                  = var.env
   resource_groups      = var.resource_groups
@@ -15,7 +15,7 @@ module "boot_diagnostic_storage" {
     account_tier             = "Standard"
     account_replication_type = "GRS"
     private_endpoint = {
-      "${var.user_defined_string}-logs" = {
+      "${var.userDefinedString}-logs" = {
         resource_group    = var.vmss.resource_group_name
         subnet            = var.vmss.nic.nic1.ip_configuration.ipc1.subnet
         subresource_names = ["blob"]
