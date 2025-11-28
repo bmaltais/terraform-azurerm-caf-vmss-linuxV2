@@ -36,18 +36,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   zones                                             = try(var.vmss.zones, null)
 
   dynamic "additional_capabilities" {
-    for_each = try(var.vmss.additional_capabilities, null) != null ? [1] : []
+    for_each = try(var.vmss.additional_capabilities, null) != null ? [var.vmss.additional_capabilities] : []
     content {
-      ultra_ssd_enabled = try(var.vmss.additional_capabilities.ultra_ssd_enabled, false)
+      ultra_ssd_enabled = try(additional_capabilities.value.ultra_ssd_enabled, false)
     }
   }
 
   # Admin ssh key is NOT mutually exclusive with admin password. It is required if disable_password_authentication is set to true
   dynamic "admin_ssh_key" {
-    for_each = try(var.vmss.admin_ssh_key, null) != null ? [1] : []
+    for_each = try(var.vmss.admin_ssh_key, null) != null ? [var.vmss.admin_ssh_key] : []
     content {
-      public_key = var.vmss.admin_ssh_key.public_key
-      username   = var.vmss.admin_ssh_key.username
+      public_key = admin_ssh_key.value.public_key
+      username   = admin_ssh_key.value.username
     }
   }
 
@@ -68,9 +68,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   dynamic "boot_diagnostics" {
-    for_each = try(var.vmss.boot_diagnostic, false) != false ? [1] : []
+    for_each = try(var.vmss.boot_diagnostic, null) != null ? [var.vmss.boot_diagnostic] : []
     content {
-      storage_account_uri = try(var.vmss.boot_diagnostic.use_managed_storage_account, true) ? null : module.boot_diagnostic_storage[0].storage-account-object.primary_blob_endpoint
+      storage_account_uri = try(boot_diagnostics.value.use_managed_storage_account, true) ? null : module.boot_diagnostic_storage[0].storage-account-object.primary_blob_endpoint
     }
   }
 
@@ -125,10 +125,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
 
   # If boot diagnostic is enabled, then the VM needs a SystemAssigned identity, other acts like all other dynamic blocks
   dynamic "identity" {
-    for_each = try(var.vmss.identity, null) != null || try(var.vmss.boot_diagnostic, false) == true ? [1] : []
+    for_each = try(var.vmss.identity, null) != null || try(var.vmss.boot_diagnostic, null) != null ? [var.vmss.identity] : []
     content {
-      type         = try(var.vmss.identity.type, "SystemAssigned")
-      identity_ids = try(var.vmss.identity.type, "SystemAssigned") == "UserAssigned" ? try(var.vmss.identity.identity_ids, [azurerm_user_assigned_identity.user_assigned_identity_vmss_linux[0].id]) : []
+      type         = try(identity.value.type, "SystemAssigned")
+      identity_ids = try(identity.value.type, "SystemAssigned") == "UserAssigned" ? try(identity.value.identity_ids, [azurerm_user_assigned_identity.user_assigned_identity_vmss_linux[0].id]) : []
     }
   }
 
@@ -215,10 +215,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   dynamic "scale_in" {
-    for_each = try(var.vmss.scale_in, null) != null ? [1] : []
+    for_each = try(var.vmss.scale_in, null) != null ? [var.vmss.scale_in] : []
     content {
-      rule                   = try(var.vmss.scale_in.rule, null)
-      force_deletion_enabled = try(var.vmss.scale_in.force_deletion_enabled, null)
+      rule                   = try(scale_in.value.rule, null)
+      force_deletion_enabled = try(scale_in.value.force_deletion_enabled, null)
     }
   }
 
