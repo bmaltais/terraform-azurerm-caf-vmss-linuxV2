@@ -243,10 +243,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   dynamic "spot_restore" {
-    for_each = try(var.vmss.spot_restore, null) != null ? [1] : []
+    for_each = try(var.vmss.spot_restore, {})
     content {
-      enabled = try(var.vmss.spot_restore.enabled, null)
-      timeout = try(var.vmss.spot_restore.timeout, null)
+      enabled = try(spot_restore.value.enabled, null)
+      timeout = try(spot_restore.value.timeout, null)
     }
   }
 
