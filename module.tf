@@ -105,7 +105,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
         for_each = try(extension.value.protected_settings_from_key_vault, {})
         content {
           secret_url      = protected_settings_from_key_vault.value.secret_url
-          source_vault_id = rotected_settings_from_key_vault.value.source_vault_id
+          source_vault_id = protected_settings_from_key_vault.value.source_vault_id
         }
       }
       provision_after_extensions = try(extension.value.provision_after_extensions, null)
@@ -243,10 +243,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   dynamic "spot_restore" {
-    for_each = try(var.vmss.spot_restore, {})
+    for_each = try(var.vmss.spot_restore, null) != null ? [1] : []
     content {
-      enabled = try(spot_restore.value.enabled, null)
-      timeout = try(spot_restore.value.timeout, null)
+      enabled = try(var.vmss.spot_restore.enabled, null)
+      timeout = try(var.vmss.spot_restore.timeout, null)
     }
   }
 
