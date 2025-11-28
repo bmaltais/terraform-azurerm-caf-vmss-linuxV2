@@ -68,7 +68,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   dynamic "boot_diagnostics" {
-    for_each = try(var.vmss.boot_diagnostic, null) != null ? [var.vmss.boot_diagnostic] : []
+    for_each = try(var.vmss.boot_diagnostic, false) != false ? [var.vmss.boot_diagnostic] : []
     content {
       storage_account_uri = try(boot_diagnostics.value.use_managed_storage_account, true) ? null : module.boot_diagnostic_storage[0].storage-account-object.primary_blob_endpoint
     }
@@ -125,7 +125,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
 
   # If boot diagnostic is enabled, then the VM needs a SystemAssigned identity, other acts like all other dynamic blocks
   dynamic "identity" {
-    for_each = try(var.vmss.identity, null) != null || try(var.vmss.boot_diagnostic, null) != null ? [coalesce(var.vmss.identity, { type = "SystemAssigned" })] : []
+    for_each = try(var.vmss.identity, null) != null || try(var.vmss.boot_diagnostic, false) == true ? [coalesce(var.vmss.identity, { type = "SystemAssigned" })] : []
     content {
       type         = try(identity.value.type, "SystemAssigned")
       identity_ids = try(identity.value.type, "SystemAssigned") == "UserAssigned" ? try(identity.value.identity_ids, [azurerm_user_assigned_identity.user_assigned_identity_vmss_linux[0].id]) : []
