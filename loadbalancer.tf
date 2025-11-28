@@ -5,7 +5,7 @@ module "load_balancer" {
   location          = var.location
   subnets           = var.subnets
   resource_groups   = var.resource_groups
-  userDefinedString = var.userDefinedString
+  userDefinedString = var.user_defined_string
   tags              = var.tags
   env               = var.env
   group             = var.group
